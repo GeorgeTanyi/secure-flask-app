@@ -1,0 +1,32 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Installing dependencies..."
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - pip install bandit pip-audit
+      
+  pre_build:
+    commands:
+      - echo "Running security scans..."
+      - echo "Running Bandit SAST scan..."
+      - bandit -r . -f json -o bandit-report.json || true
+      - bandit -r . -f txt
+      - echo "Running dependency vulnerability scan..."
+      - pip-audit --format json --output pip-audit-report.json || true
+      - pip-audit
+      
+  build:
+    commands:
+      - echo "Build phase - packaging application..."
+      - echo "Application built successfully"
+
+artifacts:
+  files:
+    - '**/*'
+    - bandit-report.json
+    - pip-audit-report.json
